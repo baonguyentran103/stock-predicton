@@ -61,6 +61,38 @@ def handle_data(name):
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
+def handle_data_xgboost(name):
+    df = pd.read_csv(name + '.csv')
+    df["Date"] = pd.to_datetime(df.Date, format="%Y-%m-%d")
+    df.index = df.Date
+    df.drop(columns=["Date", "Open", "High", "Low"], axis=1, inplace=True)
+    
+    final_dataset = df.values
+    data_length = final_dataset.shape[0]
+    validation_data_length = int(data_length * 0.1)
+    train_data_length = data_length - validation_data_length
+    train_data = final_dataset[0:train_data_length, :]
+    valid_data = final_dataset[train_data_length:, :]
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    scaled_data = scaler.fit_transform(final_dataset)
+    x_train_data, y_train_data = [], []
+    for i in range(60, len(train_data)):
+        x_train_data.append(scaled_data[i-60:i, 0])
+        y_train_data.append(scaled_data[i, 0])
+
+    x_train_data, y_train_data = np.array(x_train_data), np.array(y_train_data)
+    # x_train_data = np.reshape(
+    #     x_train_data, (x_train_data.shape[0], x_train_data.shape[1], 1))
+    X_test = []
+    inputs_data = df[len(df)-len(valid_data)-60:].values
+    inputs_data = inputs_data.reshape(-1, 1)
+    inputs_data = scaler.transform(inputs_data)
+    for i in range(60, inputs_data.shape[0]):
+        X_test.append(inputs_data[i-60:i, 0])
+    X_test = np.array(X_test)
+    # X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+    return [x_train_data, y_train_data, X_test, valid_data, scaler]
+
 def train_LTSM_close_name(x_train_data, y_train_data, name):
     lstm_model = Sequential()
     lstm_model.add(LSTM(units=50, return_sequences=True,
@@ -112,6 +144,38 @@ def handle_data_roc(name):
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
+def handle_data_roc_xgboost(name):
+    df = pd.read_csv(name + '.csv')
+    df["Date"] = pd.to_datetime(df.Date, format="%Y-%m-%d")
+    df.index = df.Date
+    df.drop(columns=["Date", "Open", "High", "Low"], axis=1, inplace=True)
+    df =df.pct_change(periods=1)
+    final_dataset = df.values
+    data_length = final_dataset.shape[0]
+    validation_data_length = int(data_length * 0.1)
+    train_data_length = data_length - validation_data_length
+    train_data = final_dataset[0:train_data_length, :]
+    valid_data = final_dataset[train_data_length:, :]
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    scaled_data = scaler.fit_transform(final_dataset)
+    x_train_data, y_train_data = [], []
+    for i in range(60, len(train_data)):
+        x_train_data.append(scaled_data[i-60:i, 0])
+        y_train_data.append(scaled_data[i, 0])
+
+    x_train_data, y_train_data = np.array(x_train_data), np.array(y_train_data)
+    # x_train_data = np.reshape(
+    #     x_train_data, (x_train_data.shape[0], x_train_data.shape[1], 1))
+    X_test = []
+    inputs_data = df[len(df)-len(valid_data)-60:].values
+    inputs_data = inputs_data.reshape(-1, 1)
+    inputs_data = scaler.transform(inputs_data)
+    for i in range(60, inputs_data.shape[0]):
+        X_test.append(inputs_data[i-60:i, 0])
+    X_test = np.array(X_test)
+    # X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+    return [x_train_data, y_train_data, X_test, valid_data, scaler]
+
 def train_RNN_close_name(x_train_data, y_train_data, name):
     my_rnn_model = Sequential()
     my_rnn_model.add(SimpleRNN(32, return_sequences=True))
@@ -129,31 +193,37 @@ def train_RNN_close_name(x_train_data, y_train_data, name):
 def train_XGBoost_close_name(x_train_data, y_train_data, name):
     xgb = XGBRegressor(objective='reg:squarederror', random_state=42, booster='gbtree')
     xgb.fit(x_train_data, y_train_data)
-    xgb.save_model("xgb" + name + ".json")
+    xgb.save_model("xgb" + name + ".h5")
 def train_models():
     get_all_ticket_new_data()
     [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data('BTC-USD')
     train_LTSM_close_name(x_train_data, y_train_data, 'BTC-USD')
     train_RNN_close_name(x_train_data, y_train_data, 'BTC-USD')
-    # train_XGBoost_close_name(x_train_data, y_train_data, 'BTC-USD')
+    [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data_xgboost('BTC-USD')
+    train_XGBoost_close_name(x_train_data, y_train_data, 'BTC-USD')
     [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data('ETH-USD')
     train_LTSM_close_name(x_train_data, y_train_data, 'ETH-USD')
     train_RNN_close_name(x_train_data, y_train_data, 'ETH-USD')
-    # train_XGBoost_close_name(x_train_data, y_train_data, 'ETH-USD')
+    [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data_xgboost('ETH-USD')
+    train_XGBoost_close_name(x_train_data, y_train_data, 'ETH-USD')
     [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data('ADA-USD')
     train_LTSM_close_name(x_train_data, y_train_data, 'ADA-USD')
     train_RNN_close_name(x_train_data, y_train_data, 'ADA-USD')
-    # train_XGBoost_close_name(x_train_data, y_train_data, 'ADA-USD')
+    [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data_xgboost('ADA-USD')
+    train_XGBoost_close_name(x_train_data, y_train_data, 'ADA-USD')
 
     [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data_roc('BTC-USD')
     train_LTSM_close_name(x_train_data, y_train_data, 'BTC-USD-ROC')
     train_RNN_close_name(x_train_data, y_train_data, 'BTC-USD-ROC')
-    # train_XGBoost_close_name(x_train_data, y_train_data, 'BTC-USD-ROC')
+    [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data_roc_xgboost('BTC-USD')
+    train_XGBoost_close_name(x_train_data, y_train_data, 'BTC-USD-ROC')
     [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data_roc('ETH-USD')
     train_LTSM_close_name(x_train_data, y_train_data, 'ETH-USD-ROC')
     train_RNN_close_name(x_train_data, y_train_data, 'ETH-USD-ROC')
-    # train_XGBoost_close_name(x_train_data, y_train_data, 'ETH-USD-ROC')
+    [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data_roc_xgboost('ETH-USD')
+    train_XGBoost_close_name(x_train_data, y_train_data, 'ETH-USD-ROC')
     [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data_roc('ADA-USD')
     train_LTSM_close_name(x_train_data, y_train_data, 'ADA-USD-ROC')
     train_RNN_close_name(x_train_data, y_train_data, 'ADA-USD-ROC')
-    # train_XGBoost_close_name(x_train_data, y_train_data, 'ADA-USD-ROC')
+    [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data_roc_xgboost('ADA-USD')
+    train_XGBoost_close_name(x_train_data, y_train_data, 'ADA-USD-ROC')
