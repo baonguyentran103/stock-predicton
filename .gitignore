@@ -6,7 +6,6 @@ __pycache__/
 # C extensions
 *.so
 *.h5
-*.ipynb
 # Distribution / packaging
 .Python
 build/
