@@ -4,4 +4,4 @@
 - run file main.py
 - run file stock_app.py
 
-demo link:
+Demo: https://youtu.be/M_Fd5VGYdBk
