@@ -14,6 +14,7 @@ app = dash.Dash()
 server = app.server
 
 ltsm_model_btc = load_model("ltsm-BTC-USD.h5")
+ltsm_model_btc_roc = load_model("ltsm-BTC-USD-ROC.h5")
 rnn_model_btc = load_model("rnnBTC-USD.h5")
 xgb_model_btc = xgb.XGBRegressor()
 xgb_model_btc.load_model("xgbBTC-USD.json")
@@ -46,12 +47,15 @@ rnn_model_ada = load_model("rnnADA-USD.h5")
 # inputs_ada = scaler.transform(inputs_ada)
 
 [x_train_data_btc, y_train_data_btc, X_test_btc,
-    valid_data_btc, scaler_btc] = handle_data_xgboost('BTC-USD')
+    valid_data_btc, scaler_btc] = handle_data('BTC-USD')
+[x_train_data_btc_roc, y_train_data_btc_roc, X_test_btc_roc,
+    valid_data_btc_roc, scaler_btc_roc] = handle_data_roc('BTC-USD')
 
 
-ltsm_closing_price_btc = xgb_model_btc.predict(X_test_btc)
-ltsm_closing_price_btc = np.reshape(ltsm_closing_price_btc, (ltsm_closing_price_btc.shape[0], 1))
+ltsm_closing_price_btc = ltsm_model_btc.predict(X_test_btc)
 ltsm_closing_price_btc = scaler_btc.inverse_transform(ltsm_closing_price_btc)
+ltsm_closing_price_btc_roc = ltsm_model_btc_roc.predict(X_test_btc_roc)
+ltsm_closing_price_btc_roc = scaler_btc_roc.inverse_transform(ltsm_closing_price_btc_roc)
 
 rnn_closing_price_btc = rnn_model_btc.predict(X_test_btc)
 rnn_closing_price_btc = scaler_btc.inverse_transform(rnn_closing_price_btc)
@@ -68,8 +72,11 @@ X_test_ada = []
 #     X_test_ada, (X_test_ada.shape[0], X_test_ada.shape[1], 1))
 # closing_price_ada = model_ada.predict(X_test_ada)
 # closing_price_ada = scaler_ada.inverse_transform(closing_price_ada)
-
 valid_data_btc['Predictions-ltsm'] = ltsm_closing_price_btc
+A =valid_data_btc_roc.shift(1)['Close']
+ltsm_closing_price_btc_roc = ltsm_closing_price_btc_roc.reshape(-1)
+B = ltsm_closing_price_btc_roc * A
+valid_data_btc_roc['Predictions-ltsm-roc'] = valid_data_btc_roc['Close'] + B
 
 # train_eth = new_data_eth[:1000]
 # valid_eth = new_data_eth[1000:]
@@ -292,12 +299,12 @@ def update_graph(selected_dropdown):
     trace2 = []
     trace1.append(
         go.Scatter(x=valid_data_btc.index,
-                    y=valid_data_btc["Close"],
+                    y=valid_data_btc_roc["Close"],
                     mode='lines', opacity=0.7,
                     name=f'Actual Close', textposition='bottom center'))
     trace2.append(
         go.Scatter(x=valid_data_btc.index,
-                    y=valid_data_btc['Predictions-ltsm'],
+                    y=valid_data_btc_roc['Predictions-ltsm-roc'],
                     mode='lines', opacity=0.7,
                     name=f'Predict Close', textposition='bottom center'))
 

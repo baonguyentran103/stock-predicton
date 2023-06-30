@@ -119,7 +119,9 @@ def handle_data_roc(name):
     df["Date"] = pd.to_datetime(df.Date, format="%Y-%m-%d")
     df.index = df.Date
     df.drop(columns=["Date", "Open", "High", "Low"], axis=1, inplace=True)
+    df2 = df
     df =df.pct_change(periods=1)
+    df = df.drop(['2020-06-09'])
     final_dataset = df.values
     data_length = final_dataset.shape[0]
     validation_data_length = int(data_length * 0.1)
@@ -144,7 +146,7 @@ def handle_data_roc(name):
         X_test.append(inputs_data[i-60:i, 0])
     X_test = np.array(X_test)
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
-    valid_data = df[train_data_length:]
+    valid_data = df2[train_data_length+1:]
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
 def handle_data_roc_xgboost(name):
@@ -153,6 +155,7 @@ def handle_data_roc_xgboost(name):
     df.index = df.Date
     df.drop(columns=["Date", "Open", "High", "Low"], axis=1, inplace=True)
     df =df.pct_change(periods=1)
+    df = df.drop(['2020-06-09'])
     final_dataset = df.values
     data_length = final_dataset.shape[0]
     validation_data_length = int(data_length * 0.1)
@@ -176,8 +179,7 @@ def handle_data_roc_xgboost(name):
     for i in range(60, inputs_data.shape[0]):
         X_test.append(inputs_data[i-60:i, 0])
     X_test = np.array(X_test)
-    valid_data = df[train_data_length:]
-    print(len(valid_data))
+    valid_data = df[train_data_length+1:]
     # X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
@@ -200,7 +202,7 @@ def train_XGBoost_close_name(x_train_data, y_train_data, name):
     xgb.fit(x_train_data, y_train_data)
     xgb.save_model("xgb" + name + ".json")
 def train_models():
-    get_all_ticket_new_data()
+    # get_all_ticket_new_data()
     [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data('BTC-USD')
     train_LTSM_close_name(x_train_data, y_train_data, 'BTC-USD')
     train_RNN_close_name(x_train_data, y_train_data, 'BTC-USD')
