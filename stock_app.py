@@ -13,35 +13,35 @@ from utils import *
 app = dash.Dash()
 server = app.server
 
-ltsm_model_btc = load_model("ltsm-BTC-USD.h5")
-rnn_model_btc = load_model("rnnBTC-USD.h5")
+ltsm_model_btc = load_model("models/ltsm-BTC-USD.h5")
+rnn_model_btc = load_model("models/rnnBTC-USD.h5")
 xgb_model_btc = xgb.XGBRegressor()
-xgb_model_btc.load_model("xgbBTC-USD.json")
+xgb_model_btc.load_model("models/xgbBTC-USD.json")
 
-ltsm_model_btc_roc = load_model("ltsm-BTC-USD-ROC.h5")
-rnn_model_btc_roc = load_model("rnnBTC-USD-ROC.h5")
+ltsm_model_btc_roc = load_model("models/ltsm-BTC-USD-ROC.h5")
+rnn_model_btc_roc = load_model("models/rnnBTC-USD-ROC.h5")
 xgb_model_btc_roc = xgb.XGBRegressor()
-xgb_model_btc_roc.load_model("xgbBTC-USD-ROC.json")
+xgb_model_btc_roc.load_model("models/xgbBTC-USD-ROC.json")
 
-ltsm_model_eth = load_model("ltsm-ETH-USD.h5")
-rnn_model_eth = load_model("rnnETH-USD.h5")
+ltsm_model_eth = load_model("models/ltsm-ETH-USD.h5")
+rnn_model_eth = load_model("models/rnnETH-USD.h5")
 xgb_model_eth = xgb.XGBRegressor()
-xgb_model_eth.load_model("xgbETH-USD.json")
+xgb_model_eth.load_model("models/xgbETH-USD.json")
 
-ltsm_model_eth_roc = load_model("ltsm-ETH-USD-ROC.h5")
-rnn_model_eth_roc = load_model("rnnETH-USD-ROC.h5")
+ltsm_model_eth_roc = load_model("models/ltsm-ETH-USD-ROC.h5")
+rnn_model_eth_roc = load_model("models/rnnETH-USD-ROC.h5")
 xgb_model_eth_roc = xgb.XGBRegressor()
-xgb_model_eth_roc.load_model("xgbETH-USD-ROC.json")
+xgb_model_eth_roc.load_model("models/xgbETH-USD-ROC.json")
 
-ltsm_model_ada = load_model("ltsm-ADA-USD.h5")
-rnn_model_ada = load_model("rnnADA-USD.h5")
+ltsm_model_ada = load_model("models/ltsm-ADA-USD.h5")
+rnn_model_ada = load_model("models/rnnADA-USD.h5")
 xgb_model_ada = xgb.XGBRegressor()
-xgb_model_ada.load_model("xgbADA-USD.json")
+xgb_model_ada.load_model("models/xgbADA-USD.json")
 
-ltsm_model_ada_roc = load_model("ltsm-ADA-USD-ROC.h5")
-rnn_model_ada_roc = load_model("rnnADA-USD-ROC.h5")
+ltsm_model_ada_roc = load_model("models/ltsm-ADA-USD-ROC.h5")
+rnn_model_ada_roc = load_model("models/rnnADA-USD-ROC.h5")
 xgb_model_ada_roc = xgb.XGBRegressor()
-xgb_model_ada_roc.load_model("xgbADA-USD-ROC.json")
+xgb_model_ada_roc.load_model("models/xgbADA-USD-ROC.json")
 
 # btc
 [x_train_data_btc, y_train_data_btc, X_test_btc,
@@ -229,7 +229,7 @@ app.layout = html.Div([
                              style={"display": "block", "margin-left": "auto",
                                     "margin-right": "auto", "width": "60%"}),
                 dcc.Graph(id='btc-ltsm'),
-                html.H1("RNN Predicted closing price",
+                html.H1("models/rnn Predicted closing price",
                         style={'textAlign': 'center'}),
                 dcc.Graph(id='btc-rnn'),
                 html.H1("XGB Predicted closing price",
@@ -250,7 +250,7 @@ app.layout = html.Div([
                              style={"display": "block", "margin-left": "auto",
                                     "margin-right": "auto", "width": "60%"}),
                 dcc.Graph(id='eth-ltsm'),
-                html.H1("RNN Predicted closing price",
+                html.H1("models/rnn Predicted closing price",
                         style={'textAlign': 'center'}),
                 dcc.Graph(id='eth-rnn'),
                 html.H1("XGB Predicted closing price",
@@ -271,7 +271,7 @@ app.layout = html.Div([
                              style={"display": "block", "margin-left": "auto",
                                     "margin-right": "auto", "width": "60%"}),
                 dcc.Graph(id='ada-ltsm'),
-                html.H1("RNN Predicted closing price",
+                html.H1("models/rnn Predicted closing price",
                         style={'textAlign': 'center'}),
                 dcc.Graph(id='ada-rnn'),
                 html.H1("XGB Predicted closing price",
