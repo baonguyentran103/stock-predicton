@@ -59,6 +59,7 @@ def handle_data(name):
         X_test.append(inputs_data[i-60:i, 0])
     X_test = np.array(X_test)
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+    valid_data = df[train_data_length:]
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
 def handle_data_xgboost(name):
@@ -91,6 +92,7 @@ def handle_data_xgboost(name):
         X_test.append(inputs_data[i-60:i, 0])
     X_test = np.array(X_test)
     # X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+    valid_data = df[train_data_length:]
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
 def train_LTSM_close_name(x_train_data, y_train_data, name):
@@ -142,6 +144,7 @@ def handle_data_roc(name):
         X_test.append(inputs_data[i-60:i, 0])
     X_test = np.array(X_test)
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+    valid_data = df[train_data_length:]
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
 def handle_data_roc_xgboost(name):
@@ -173,6 +176,8 @@ def handle_data_roc_xgboost(name):
     for i in range(60, inputs_data.shape[0]):
         X_test.append(inputs_data[i-60:i, 0])
     X_test = np.array(X_test)
+    valid_data = df[train_data_length:]
+    print(len(valid_data))
     # X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
@@ -193,7 +198,7 @@ def train_RNN_close_name(x_train_data, y_train_data, name):
 def train_XGBoost_close_name(x_train_data, y_train_data, name):
     xgb = XGBRegressor(objective='reg:squarederror', random_state=42, booster='gbtree')
     xgb.fit(x_train_data, y_train_data)
-    xgb.save_model("xgb" + name + ".h5")
+    xgb.save_model("xgb" + name + ".json")
 def train_models():
     get_all_ticket_new_data()
     [x_train_data, y_train_data, X_test, valid_data, scaler] = handle_data('BTC-USD')
