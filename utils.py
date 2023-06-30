@@ -57,9 +57,15 @@ def handle_data(name):
     inputs_data = scaler.transform(inputs_data)
     for i in range(60, inputs_data.shape[0]):
         X_test.append(inputs_data[i-60:i, 0])
+    X_test.append(inputs_data[inputs_data.shape[0]-60:inputs_data.shape[0], 0])
     X_test = np.array(X_test)
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     valid_data = df[train_data_length:]
+    valid_data["Date"] = valid_data.index
+    df = {"Date": valid_data["Date"][len(valid_data)-1] + pd.DateOffset(days=1)}
+    valid_data = pd.concat([valid_data, pd.DataFrame(df, index=[len(valid_data)])])
+    valid_data.index = valid_data.Date
+    valid_data.drop(columns=["Date"], axis=1, inplace=True)
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
 def handle_data_xgboost(name):
@@ -90,9 +96,14 @@ def handle_data_xgboost(name):
     inputs_data = scaler.transform(inputs_data)
     for i in range(60, inputs_data.shape[0]):
         X_test.append(inputs_data[i-60:i, 0])
+    X_test.append(inputs_data[inputs_data.shape[0]-60:inputs_data.shape[0], 0])
     X_test = np.array(X_test)
-    # X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     valid_data = df[train_data_length:]
+    valid_data["Date"] = valid_data.index
+    df = {"Date": valid_data["Date"][len(valid_data)-1] + pd.DateOffset(days=1)}
+    valid_data = pd.concat([valid_data, pd.DataFrame(df, index=[len(valid_data)])])
+    valid_data.index = valid_data.Date
+    valid_data.drop(columns=["Date"], axis=1, inplace=True)
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
 def train_LTSM_close_name(x_train_data, y_train_data, name):
@@ -144,9 +155,16 @@ def handle_data_roc(name):
     inputs_data = scaler.transform(inputs_data)
     for i in range(60, inputs_data.shape[0]):
         X_test.append(inputs_data[i-60:i, 0])
+    X_test.append(inputs_data[inputs_data.shape[0]-60:inputs_data.shape[0], 0])
     X_test = np.array(X_test)
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     valid_data = df2[train_data_length+1:]
+    valid_data["Date"] = valid_data.index
+    df = {"Date": valid_data["Date"][len(valid_data)-1] + pd.DateOffset(days=1)}
+    valid_data = pd.concat([valid_data, pd.DataFrame(df, index=[len(valid_data)])])
+    valid_data.index = valid_data.Date
+    valid_data.drop(columns=["Date"], axis=1, inplace=True)
+    
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
 def handle_data_roc_xgboost(name):
@@ -154,6 +172,7 @@ def handle_data_roc_xgboost(name):
     df["Date"] = pd.to_datetime(df.Date, format="%Y-%m-%d")
     df.index = df.Date
     df.drop(columns=["Date", "Open", "High", "Low"], axis=1, inplace=True)
+    df2 = df
     df =df.pct_change(periods=1)
     df = df.drop(['2020-06-09'])
     final_dataset = df.values
@@ -178,9 +197,14 @@ def handle_data_roc_xgboost(name):
     inputs_data = scaler.transform(inputs_data)
     for i in range(60, inputs_data.shape[0]):
         X_test.append(inputs_data[i-60:i, 0])
+    X_test.append(inputs_data[inputs_data.shape[0]-60:inputs_data.shape[0], 0])
     X_test = np.array(X_test)
-    valid_data = df[train_data_length+1:]
-    # X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+    valid_data = df2[train_data_length+1:]
+    valid_data["Date"] = valid_data.index
+    df = {"Date": valid_data["Date"][len(valid_data)-1] + pd.DateOffset(days=1)}
+    valid_data = pd.concat([valid_data, pd.DataFrame(df, index=[len(valid_data)])])
+    valid_data.index = valid_data.Date
+    valid_data.drop(columns=["Date"], axis=1, inplace=True)
     return [x_train_data, y_train_data, X_test, valid_data, scaler]
 
 def train_RNN_close_name(x_train_data, y_train_data, name):
