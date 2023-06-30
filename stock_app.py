@@ -6,6 +6,7 @@ import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
+import xgboost as xgb
 import numpy as np
 from utils import *
 
@@ -14,6 +15,8 @@ server = app.server
 
 ltsm_model_btc = load_model("ltsm-BTC-USD.h5")
 rnn_model_btc = load_model("rnnBTC-USD.h5")
+xgb_model_btc = xgb.XGBRegressor()
+xgb_model_btc.load_model("xgbBTC-USD.json")
 # xgb_model_btc = load_model("models/xgbBTC-USD.h5")
 
 ltsm_model_eth = load_model("ltsm-ETH-USD.h5")
@@ -43,10 +46,11 @@ rnn_model_ada = load_model("rnnADA-USD.h5")
 # inputs_ada = scaler.transform(inputs_ada)
 
 [x_train_data_btc, y_train_data_btc, X_test_btc,
-    valid_data_btc, scaler_btc] = handle_data('BTC-USD')
+    valid_data_btc, scaler_btc] = handle_data_xgboost('BTC-USD')
 
 
-ltsm_closing_price_btc = ltsm_model_btc.predict(X_test_btc)
+ltsm_closing_price_btc = xgb_model_btc.predict(X_test_btc)
+ltsm_closing_price_btc = np.reshape(ltsm_closing_price_btc, (ltsm_closing_price_btc.shape[0], 1))
 ltsm_closing_price_btc = scaler_btc.inverse_transform(ltsm_closing_price_btc)
 
 rnn_closing_price_btc = rnn_model_btc.predict(X_test_btc)
